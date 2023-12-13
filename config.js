@@ -1,6 +1,6 @@
 const SECRET_KEY = process.env.SECRET_KEY || "SUPER_SECRET";
 const PORT = process.env.PORT ||3001;
-const accessToken = "EAAAEPNV2vMOAGUU9JwJrsqLiAYIeoiEoPsnuaFfSsA_9Ryd5qo3QVwOL-kozzth";
+const accessToken = process.env.SQUARE_TOKEN||"";
 
 function getDatabaseUri(){
     return (process.env.NODE_ENV==="test")?
