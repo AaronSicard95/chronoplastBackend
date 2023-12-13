@@ -2,14 +2,28 @@ const express = require ('express');
 const Band = require('../models/band');
 const { ensureAdmin } = require('../middleware/auth');
 const router = express.Router();
+const {S3Client} = require('@aws-sdk/client-s3');
+const s3 = new S3Client({region:"us-east-1",
+credentials:{secretAccessKey:"fQoGuXQEdWXXU7Imq9MjLEo3szWHDQ0yGk4HE9Fw",
+accessKeyId:"AKIAVDAHGU2J5MNGVPX5"}});
+const multerS3 = require('multer-s3');
 const multer = require("multer");
-const storage = multer.diskStorage({destination: 'images/',
-    filename: function(req,file,next){
-    next(null,file.originalname.split('.')[0]+Date.now() +'.'+ file.originalname.split('.').pop());
-}});
+const upload = multer({storage: multerS3({
+    s3:s3,
+    bucket: 'chronoplastphotos',
+    metadata: function (req, file, cb) {
+      cb(null, {fieldName: file.fieldname});
+    },
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString())
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function(req,file,next){
+    next(null,file.originalname.split('.')[0]+Date.now() +'.'+ file.originalname.split('.').pop())}
+  })
+});
 const jsonschema = require ('jsonschema');
 const Genre = require('../models/genre');
-const upload = multer({storage: storage});
 
 router.get('/', async function(req,res,next){
     try{
@@ -35,7 +49,7 @@ router.post('/', upload.single('image'), ensureAdmin, async function(req,res,nex
         const genres = band.genres;
         delete band.genres;
         if(req.file){
-            band= {...band, imageURL: req.file.path};
+            band= {...band, imageURL: req.file.location};
         }
         delete band.image;
         const newBand = await Band.makeBand(band);
@@ -54,7 +68,7 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
         const genres = band.genres;
         delete band.genres;
         if(req.file){
-            band.imageURL = req.file.path;
+            band.imageURL = req.file.location;
         }
         delete band.image;
         const newBand = await Band.updateBand(req.params.id, band);

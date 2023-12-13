@@ -4,7 +4,7 @@ const accessToken = process.env.SQUARE_TOKEN||"";
 
 function getDatabaseUri(){
     return (process.env.NODE_ENV==="test")?
-    "chronoplast_test":process.env.DATABASE_URL||"chronoplast";
+    "chronoplast_test":process.env.DATABASE_URL||"postgres://chronoplast:5432/postgres";
 }
 
 const BCRYPT_WORK_FACTOR = process.env.NODE_ENV==="test"?1:13;

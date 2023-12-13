@@ -1,16 +1,30 @@
 const express = require('express');
+const {S3Client} = require('@aws-sdk/client-s3');
+const s3 = new S3Client({region:"us-east-1",
+credentials:{secretAccessKey:"fQoGuXQEdWXXU7Imq9MjLEo3szWHDQ0yGk4HE9Fw",
+accessKeyId:"AKIAVDAHGU2J5MNGVPX5"}});
+const multerS3 = require('multer-s3');
+const multer = require("multer");
+const upload = multer({storage: multerS3({
+    s3:s3,
+    bucket: 'chronoplastphotos',
+    metadata: function (req, file, cb) {
+      cb(null, {fieldName: file.fieldname});
+    },
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString())
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function(req,file,next){
+    next(null,file.originalname.split('.')[0]+Date.now() +'.'+ file.originalname.split('.').pop())}
+  })
+});
+const jsonschema = require ('jsonschema');
 const Record = require('../models/record');
 const Band = require('../models/band');
 const Order = require('../models/order');
 const { checkLoggedIn, ensureAdmin, ensureSameUser } = require('../middleware/auth');
 const router = express.Router();
-const multer = require("multer");
-const storage = multer.diskStorage({destination: 'images/',
-    filename: function(req,file,next){
-    next(null,file.originalname.split('.')[0]+Date.now() +'.'+ file.originalname.split('.').pop());
-}});
-const jsonschema = require ('jsonschema');
-const upload = multer({storage: storage});
 const newRecordSchema = require('../schemas/recordNew.json');
 const updateRecordSchema = require('../schemas/recordUpdate.json');
 const { BadRequestError } = require('../expressError');
@@ -39,6 +53,7 @@ router.get('/top', async function(req,res,next){
 router.post('/', upload.single('image'), ensureAdmin, async function(req,res,next){
     try{
         const record = req.body;
+        console.log(req.file.location);
         const validator = jsonschema.validate(record, newRecordSchema);
         if(!validator.valid) throw new BadRequestError("Not valid record data");
         const existingBand = await Band.findBandByName(record.band);
@@ -49,10 +64,12 @@ router.post('/', upload.single('image'), ensureAdmin, async function(req,res,nex
             record.band_id = newBand.id;
         }
         recordData = {title: record.title, band_id: record.band_id};
-        if(req.file.path){
-            recordData = {...recordData, "imageURL": req.file.path};
+        if(req.file.location){
+            recordData = {...recordData, "imageURL": req.file.location};
+            console.log("added location");
         }
         const newRecord = await Record.makeRecord(recordData);
+        console.log("made record");
         for(let genre of record.genres){
             await Genre.attachToRecord(newRecord.id, genre);
         }
@@ -77,7 +94,7 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
     try{
         let record = req.body;
         if(req.file){
-            record = {...record, "imageURL": req.file.path};
+            record = {...record, "imageURL": req.file.location};
         }
         delete record.image;
         const validator = jsonschema.validate(record, updateRecordSchema);
@@ -145,7 +162,7 @@ router.patch('/:id/listings/:lid', ensureAdmin, upload.single('image'), async fu
         const id = req.params.lid;
         const listing = req.body;
         if(req.file){
-            listing={...listing, imageURL: req.file.path};
+            listing={...listing, imageURL: req.file.location};
         }
         const result = Listing.updateListing(id,listing);
         return res.json(result);
