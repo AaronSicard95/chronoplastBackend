@@ -4,7 +4,7 @@ const {getDatabaseUri} = require("./config");
 let db;
 
 //for local
-/*if(process.env.NODE_ENV === "production"){
+if(process.env.NODE_ENV === "production"){
     db = new Client({
         user: 'postgres',
         host: 'localhost',
@@ -23,10 +23,10 @@ let db;
         password: 'postgres',
         port: 5432,
     });
-}*/
+}
 
 //for heroku
-if (process.env.NODE_ENV === "production") {
+/*if (process.env.NODE_ENV === "production") {
   db = new Client({
     connectionString: getDatabaseUri(),
     ssl: {
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV === "production") {
   db = new Client({
     connectionString: getDatabaseUri()
   });
-}
+}*/
 
 db.connect();
 
