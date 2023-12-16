@@ -3,6 +3,7 @@ const {getDatabaseUri} = require("./config");
 
 let db;
 
+if(process.env.DEPLOYED_ON==="local"){
 //for local
 if(process.env.NODE_ENV === "production"){
     db = new Client({
@@ -24,9 +25,10 @@ if(process.env.NODE_ENV === "production"){
         port: 5432,
     });
 }
-
+}
+else{
 //for heroku
-/*if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production") {
   db = new Client({
     connectionString: getDatabaseUri(),
     ssl: {
@@ -37,7 +39,8 @@ if(process.env.NODE_ENV === "production"){
   db = new Client({
     connectionString: getDatabaseUri()
   });
-}*/
+}
+}
 
 db.connect();
 
