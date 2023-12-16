@@ -1,3 +1,17 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS bands;
+DROP TABLE IF EXISTS musicians;
+DROP TABLE IF EXISTS records;
+DROP TABLE IF EXISTS listings;
+DROP TABLE IF EXISTS carts;
+DROP TABLE IF EXISTS genres;
+DROP TABLE IF EXISTS reviews;
+DROP TABLE IF EXISTS genrerecords;
+DROP TABLE IF EXISTS genrebands;
+DROP TABLE IF EXISTS bandmemebers;
+DROP TABLE IF EXISTS orders;
+
+
 CREATE TABLE users (
   username VARCHAR(25) PRIMARY KEY,
   password TEXT NOT NULL,
@@ -27,7 +41,7 @@ CREATE TABLE records(
     title TEXT NOT NULL,
     imageURL TEXT DEFAULT 'images/NoImage.jpg',
     band_id INTEGER NOT NULL
-        REFERENCES bands(id)
+        REFERENCES bands(id) ON DELETE CASCADE
 );
 
 CREATE TABLE listings(
@@ -37,7 +51,7 @@ CREATE TABLE listings(
     stock INTEGER NOT NULL DEFAULT 0,
     imageURL TEXT DEFAULT 'images/NoImage.jpg',
     record_id INTEGER
-        REFERENCES records(id)
+        REFERENCES records(id) ON DELETE CASCADE
 );
 
 CREATE TABLE carts(

@@ -1,8 +1,9 @@
 const express = require('express');
+const { AWS_SECRET_KEY, AWS_ID } = require('../config');
 const {S3Client} = require('@aws-sdk/client-s3');
 const s3 = new S3Client({region:"us-east-1",
-credentials:{secretAccessKey:"fQoGuXQEdWXXU7Imq9MjLEo3szWHDQ0yGk4HE9Fw",
-accessKeyId:"AKIAVDAHGU2J5MNGVPX5"}});
+credentials:{secretAccessKey:AWS_SECRET_KEY,
+accessKeyId:AWS_ID}});
 const multerS3 = require('multer-s3');
 const multer = require("multer");
 const upload = multer({storage: multerS3({

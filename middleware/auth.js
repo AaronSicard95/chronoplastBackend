@@ -35,7 +35,7 @@ function ensureAdmin(req,res,next){
 
 function adminOrSameUser(req,res,next){
     try{
-        if(res.locals.user.username != req.params.username&&!res.locals.isAdmin) throw new UnauthorizedError("Must be admin or selected user");
+        if(res.locals.user.username != req.params.username&&res.locals.user.isadmin!=true) throw new UnauthorizedError("Must be admin or selected user");
         return next();
     }catch(err){
         return next(err);

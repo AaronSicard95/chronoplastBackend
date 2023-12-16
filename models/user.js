@@ -28,12 +28,16 @@ class User{
     }
 
     static async findAll(){
-        const results = await db.query(
-            `SELECT username, handle, isAdmin, email
-            FROM users`
-        )
-        const users = results.rows;
-        return users;
+        try{
+            const results = await db.query(
+                `SELECT username, handle, isAdmin, email
+                FROM users`
+            )
+            const users = results.rows;
+            return users;
+        }catch(err){
+            return err;
+        }
     }
 
     //creates a new User
@@ -97,7 +101,7 @@ class User{
         const result = await db.query(
             `INSERT INTO users
             (username, password, handle, email, isAdmin)
-            VALUES ($1, $4, $5, $6, TRUE)
+            VALUES ($1, $2,$3,$4, TRUE)
             RETURNING username, handle, email, isAdmin`,
             [user.username, bPassword, user.handle, user.email]
         )

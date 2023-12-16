@@ -1,11 +1,12 @@
 const express = require ('express');
+const { AWS_SECRET_KEY, AWS_ID } = require('../config');
 const Band = require('../models/band');
 const { ensureAdmin } = require('../middleware/auth');
 const router = express.Router();
 const {S3Client} = require('@aws-sdk/client-s3');
 const s3 = new S3Client({region:"us-east-1",
-credentials:{secretAccessKey:"fQoGuXQEdWXXU7Imq9MjLEo3szWHDQ0yGk4HE9Fw",
-accessKeyId:"AKIAVDAHGU2J5MNGVPX5"}});
+credentials:{secretAccessKey:AWS_SECRET_KEY,
+accessKeyId:AWS_ID}});
 const multerS3 = require('multer-s3');
 const multer = require("multer");
 const upload = multer({storage: multerS3({
@@ -46,7 +47,7 @@ router.get('/:id', async function(req,res,next){
 router.post('/', upload.single('image'), ensureAdmin, async function(req,res,next){
     try{
         let band = req.body;
-        const genres = band.genres;
+        const genres = !band.genres?[]:band.genres;
         delete band.genres;
         if(req.file){
             band= {...band, imageURL: req.file.location};
@@ -56,7 +57,7 @@ router.post('/', upload.single('image'), ensureAdmin, async function(req,res,nex
         for(let genre of genres){
             Genre.attachToBand(newBand.id, genre);
         }
-        return res.json(band);
+        return res.status(201).json(newBand);
     }catch(err){
         return next(err);
     }
@@ -65,7 +66,7 @@ router.post('/', upload.single('image'), ensureAdmin, async function(req,res,nex
 router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res,next){
     try{
         let band = req.body;
-        const genres = band.genres;
+        const genres = !band.genres?[]:band.genres;
         delete band.genres;
         if(req.file){
             band.imageURL = req.file.location;
@@ -76,7 +77,7 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
         for(let genre of genres){
             await Genre.attachToBand(newBand.id, genre);
         }
-        return res.json(band);
+        return res.json(newBand);
     }catch(err){
         return next(err);
     }
@@ -84,8 +85,9 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
 
 router.delete('/:id', ensureAdmin, async function(req,res,next){
     try{
-        await Band.deleteBand(req.params.id);
-        return res.status(200);
+        const result = await Band.deleteBand(req.params.id);
+        console.log(result);
+        return res.status(200).json(result);
     }catch(err){
         return next(err);
     }

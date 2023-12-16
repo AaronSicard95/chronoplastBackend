@@ -1,11 +1,13 @@
+const { NotFound } = require("@aws-sdk/client-s3");
 const db = require("../db");
+const { NotFoundError, BadRequestError } = require("../expressError");
 
 class Genre{
 
     //Make a genre
     static async makeGenre(genre){
         const result = await db.query(
-            `INSERT INTO genre
+            `INSERT INTO genres
             (name)
             VALUES ($1)
             RETURNING id, name`,
@@ -54,7 +56,13 @@ class Genre{
     }
 
     static async attachToRecord(record_id, genre){
-        try{
+            const recordCheck = await db.query(`
+            SELECT title, id
+            FROM records
+            WHERE id=$1`,
+            [record_id]);
+            console.log(recordCheck);
+            if(!recordCheck.rows[0])throw new BadRequestError(`Record with id ${record_id} does not exist`);
             let genre_id;
             const search = await db.query(`
             SELECT id, name
@@ -76,7 +84,7 @@ class Genre{
                 WHERE record_id = $1 AND
                 genre_id = $2`,
                 [record_id, search.id]);
-                if(check.rows[0]) return "relation already exists";
+                if(check.rows[0])throw new BadRequestError(`Relation already exists`);
                 genre_id = search.rows[0].id;
             }
             const result = await db.query(
@@ -85,10 +93,7 @@ class Genre{
             VALUES ($1, $2)
             RETURNING record_id, genre_id`,
             [record_id, genre_id])
-            return result.rows[0];  
-        }catch(err){
-            return err;
-        }
+            return result.rows[0];
     }
 
     static async findAll(search = "",onlyNames = false){
@@ -103,7 +108,12 @@ class Genre{
     }
 
     static async getRelated(id){
-        try{
+            const nameGet = await db.query(`
+            SELECT name
+            FROM genres
+            WHERE id = $1`,
+            [id]);
+            if(!nameGet.rows[0])throw new NotFoundError(`Genre with id: ${id} does not exist`);
             const bandRes = await db.query(`
             SELECT b.name, b.id, b.bio, b.imageURL
             FROM bands b
@@ -119,40 +129,30 @@ class Genre{
             WHERE g.genre_id = $1`,
             [id]);
             const records = recordRes.rows;
-            const nameGet = await db.query(`
-            SELECT name
-            FROM genres
-            WHERE id = $1`,
-            [id]);
             const name = nameGet.rows[0].name;
             return {name, bands, records};
-        }catch(err){
-            return err;
-        }
     }
 
     static async detachAllFromRecord(id){
-        try{
+            const check = await db.query(`
+            SELECT id, name
+            FROM genres
+            WHERE id=$1`,
+            [id]);
+            if(!check.rows[0])throw new NotFoundError(`Genre with id ${id} does not exist`);
             const result = await db.query(`
             DELETE FROM genrerecords
             WHERE record_id=$1`,
             [id]);
             return "deleted";
-        }catch(err){
-            return err;
-        }
     }
     
     static async detachAllFromBand(id){
-        try{
             const result = await db.query(`
             DELETE FROM genrebands
             WHERE band_id=$1`,
             [id]);
             return "deleted";
-        }catch(err){
-            return err;
-        }
     }
 }
 

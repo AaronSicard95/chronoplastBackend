@@ -4,12 +4,3 @@ VALUES ('admin',
         'admin@chronoplast.com',
         'admin',
         TRUE);
-INSERT INTO bands (name, bio, id, imageURL)
-VALUES ('Cool Band',
-        'Coolguys',
-        1,
-        '/images/NoImage.jpg');
-INSERT INTO records (title, band_id, imageURL)
-VALUES ('New Record',
-        1,
-        '/images/NoImage.jpg');

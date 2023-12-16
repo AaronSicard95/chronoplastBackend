@@ -1,11 +1,12 @@
 const db = require("../db");
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForAdditionInsert, sqlForPatrialUpdate } = require("../helpers/sql");
 
 class Band{
 
     //Make a band
     static async makeBand(band){
+        console.log(band);
         const additional = sqlForAdditionInsert(band, ['name'])
         const result = await db.query(
             `INSERT INTO bands
@@ -18,7 +19,7 @@ class Band{
         return newBand;
     }
 
-    static async findAllBands(filters){
+    static async findAllBands(filters={}){
         let queryFilters = [];
         let keys = [];
         queryFilters = !filters.name?queryFilters:[...queryFilters, `%${filters.name}%`];
@@ -56,12 +57,12 @@ class Band{
     }
 
     static async getBand(id){
-        try{
             const result = await db.query(`
             SELECT id, name, bio, origin, imageURL
             FROM bands 
             WHERE id = $1`,
             [id]);
+            if(!result.rows[0])throw new NotFoundError(`No band with id: ${id} exists`);
             const genreRes = await db.query(`
             SELECT g.name, g.id
             FROM genres g
@@ -76,13 +77,9 @@ class Band{
             [id]);
             const band = {...result.rows[0], genres: genreRes.rows, records: recordRes.rows};
             return band;
-        }catch(err){
-            return err;
-        }
     }
 
     static async updateBand(id, data){
-        try{
             const {statement, vals} = sqlForPatrialUpdate(data);
             const idIndex = vals.length+1;
             const result = await db.query(
@@ -93,22 +90,21 @@ class Band{
                 [...vals, id]
             )
             return result.rows[0];
-        }catch(err){
-            return err;
-        }
     }
 
     static async deleteBand(id){
-        try{
+            const check = await db.query(`
+            SELECT id, name
+            FROM bands
+            WHERE id = $1`,
+            [id]);
+            if(!check.rows[0])throw new NotFoundError(`Band with id of ${id} does not exist`);
             const result = await db.query(
                 `DELETE FROM bands
                 WHERE id = $1`,
                 [id]
             )
-            return "deleted";
-        }catch(err){
-            return err;
-        }
+            return `Deleted band: ${check.rows[0].name}`;
     }
 }
 

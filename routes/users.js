@@ -9,6 +9,7 @@ const router = express.Router();
 router.get("/", ensureAdmin, async function(req, res, next){
     try{
         const users = await User.findAll();
+        console.log(users);
         return res.json(users);
     }catch(err){
         return next(err);
@@ -50,6 +51,7 @@ router.get('/:username/cart', adminOrSameUser, async function(req,res,next){
         const result = await Cart.getUserCart(username);
         return res.json(result);
     }catch(err){
+        console.log(err);
         return err;
     }
 })

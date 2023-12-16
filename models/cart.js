@@ -20,13 +20,16 @@ class Cart{
 
     static async removeFromCart(username, listing_id){
         try{
+            console.log(username, listing_id);
             const result = await db.query(
                 `DELETE FROM carts
                 WHERE username=$1 AND listing_id=$2`,
                 [username, listing_id]
             );
+            console.log(result);
             return "deleted";
         }catch(err){
+            console.log(err);
             return err;
         }
     }

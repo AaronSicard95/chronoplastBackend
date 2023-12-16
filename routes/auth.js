@@ -11,7 +11,7 @@ router.post("/login", async function(req, res, next){
         const result = await User.login(user);
         const token = createToken(result);
         console.log(result);
-        return res.json({token,username: result.username, admin: result.isadmin});
+        return res.json({token,username: result.username, isadmin: result.isadmin});
     }catch(err){
         return next(err);
     }
@@ -23,7 +23,7 @@ router.post("/register", async function(req,res,next){
         const user = req.body;
         const newUser = await User.create(user);
         const token = createToken(newUser);
-        return res.status(201).json({token,username: result.username, admin: newUser.isadmin});
+        return res.status(201).json({token,username: newUser.username, isadmin: newUser.isadmin});
     }catch(err){
         return next(err);
     }
