@@ -25,21 +25,21 @@ CREATE TABLE bands(
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
     origin TEXT,
-    imageURL TEXT DEFAULT 'images/NoImage.jpg',
+    imageURL TEXT,
     bio TEXT
 );
 
 CREATE TABLE musicians(
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    imageURL TEXT DEFAULT 'images/NoImage.jpg',
+    imageURL TEXT,
     bio TEXT
 );
 
 CREATE TABLE records(
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
-    imageURL TEXT DEFAULT 'images/NoImage.jpg',
+    imageURL TEXT,
     band_id INTEGER NOT NULL
         REFERENCES bands(id) ON DELETE CASCADE
 );
@@ -49,7 +49,7 @@ CREATE TABLE listings(
     quality TEXT,
     price NUMERIC(10,2),
     stock INTEGER NOT NULL DEFAULT 0,
-    imageURL TEXT DEFAULT 'images/NoImage.jpg',
+    imageURL TEXT,
     record_id INTEGER
         REFERENCES records(id) ON DELETE CASCADE
 );

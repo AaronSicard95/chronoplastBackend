@@ -54,7 +54,6 @@ router.get('/top', async function(req,res,next){
 router.post('/', upload.single('image'), ensureAdmin, async function(req,res,next){
     try{
         const record = req.body;
-        console.log(req.file.location);
         const validator = jsonschema.validate(record, newRecordSchema);
         if(!validator.valid) throw new BadRequestError("Not valid record data");
         const existingBand = await Band.findBandByName(record.band);
@@ -65,7 +64,7 @@ router.post('/', upload.single('image'), ensureAdmin, async function(req,res,nex
             record.band_id = newBand.id;
         }
         recordData = {title: record.title, band_id: record.band_id};
-        if(req.file.location){
+        if(req.file){
             recordData = {...recordData, "imageURL": req.file.location};
             console.log("added location");
         }
