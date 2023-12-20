@@ -29,6 +29,13 @@ app.use('/genres', genreRoutes);
 app.use('/listings', listingRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/carts', cartsRoutes);
+app.get('/', async function(req,res,next){
+    try{
+        return res.json("Welcome to the Chronoplast Backend! Use the '/records' '/bands' or '/listing' routes to get started");
+    }catch(err){
+        return next(err);
+    }
+});
 
 app.use(function(req,res,next){
     return next(new NotFoundError());
