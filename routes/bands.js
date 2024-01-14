@@ -3,7 +3,7 @@ const { AWS_SECRET_KEY, AWS_ID } = require('../config');
 const Band = require('../models/band');
 const { ensureAdmin } = require('../middleware/auth');
 const router = express.Router();
-const {S3Client} = require('@aws-sdk/client-s3');
+const {S3Client, DeleteObjectCommand} = require('@aws-sdk/client-s3');
 const s3 = new S3Client({region:"us-east-1",
 credentials:{secretAccessKey:AWS_SECRET_KEY,
 accessKeyId:AWS_ID}});
