@@ -87,7 +87,7 @@ router.delete('/:id', ensureAdmin, async function(req,res,next){
     try{
         const result = await Band.deleteBand(req.params.id);
         console.log(result);
-        return res.status(200).json(result);
+        return res.status(200).json(`Successfully deleted ${result.name} (id#${result.id})`);
     }catch(err){
         return next(err);
     }

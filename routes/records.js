@@ -126,7 +126,7 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
 router.delete('/:id', ensureAdmin, async function(req,res,next){
     try{
         const result = await Record.deleteRecord(req.params.id);
-        return res.json(result);
+        return res.json(`Successfully Delete ${result.title} (id#${result.id})`);
     }catch(err){
         return next(err);
     }
