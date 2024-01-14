@@ -99,12 +99,12 @@ class Band{
             WHERE id = $1`,
             [id]);
             if(!check.rows[0])throw new NotFoundError(`Band with id of ${id} does not exist`);
-            const result = await db.query(
+            await db.query(
                 `DELETE FROM bands
                 WHERE id = $1`,
                 [id]
             )
-            return `Deleted band: ${check.rows[0].name}`;
+            return check.rows[0];
     }
 }
 

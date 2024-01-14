@@ -1,4 +1,5 @@
 const db = require("../db");
+const { BadRequestError } = require("../expressError");
 const { sqlForPatrialUpdate } = require("../helpers/sql");
 const Listing = require("./listing");
 
@@ -141,12 +142,18 @@ class Record{
 
     static async deleteRecord(id){
         try{
-            const result = await db.query(
+            const result = await db.query(`
+            SELECT id, title, band_id, imageURL
+            FROM records
+            WHERE id=$1`,
+            [id]);
+            if(!result.rows[0])throw new BadRequestError(`Record with id ${id} does not exist`);
+            await db.query(
                 `DELETE FROM records
                 WHERE id = $1`,
                 [id]
             );
-            return "deleted"
+            return result.rows[0];
         }catch(err){
             return err;
         }
