@@ -86,7 +86,11 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
 router.delete('/:id', ensureAdmin, async function(req,res,next){
     try{
         const result = await Band.deleteBand(req.params.id);
-        console.log(result);
+        const command = new DeleteObjectCommand({
+            Bucket: 'chronoplastphotos',
+            Key: result.imageurl.split('amazonaws.com/')[1]
+        })
+        const response = await s3.send(command);
         return res.status(200).json(`Successfully deleted ${result.name} (id#${result.id})`);
     }catch(err){
         return next(err);

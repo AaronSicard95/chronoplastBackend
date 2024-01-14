@@ -1,6 +1,6 @@
 const express = require('express');
 const { AWS_SECRET_KEY, AWS_ID } = require('../config');
-const {S3Client} = require('@aws-sdk/client-s3');
+const {S3Client, DeleteObjectCommand} = require('@aws-sdk/client-s3');
 const s3 = new S3Client({region:"us-east-1",
 credentials:{secretAccessKey:AWS_SECRET_KEY,
 accessKeyId:AWS_ID}});
@@ -125,7 +125,12 @@ router.patch('/:id', upload.single('image'), ensureAdmin, async function(req,res
 
 router.delete('/:id', ensureAdmin, async function(req,res,next){
     try{
-        const result = await Record.deleteRecord(req.params.id);
+        const result = await Record.deleteRecord(req.params.id); 
+        const command = new DeleteObjectCommand({
+            Bucket: 'chronoplastphotos',
+            Key: result.imageurl.split('amazonaws.com/')[1]
+        })
+        const response = await s3.send(command);
         return res.json(`Successfully Delete ${result.title} (id#${result.id})`);
     }catch(err){
         return next(err);
